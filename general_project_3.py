@@ -7,9 +7,9 @@ import os
 import json
 
 conn = psycopg2.connect(
-    dbname="projectdb",
+    dbname="НАЗВАНИЕ БАЗЫ ДАННЫХ",
     user="postgres",
-    password="1234",
+    password="ПАРОЛЬ",
     host="localhost",
     port="5432"
 )
@@ -17,9 +17,9 @@ conn = psycopg2.connect(
 cur = conn.cursor()
 
 # Создаем бота с вашим токеном
-bot = telebot.TeleBot("7611122835:AAGaBz-4CLeVhn6j_QY3S7JwHmsnaiVrzoc")
+bot = telebot.TeleBot("Токен от @BotFather")
 
-admin = [1078189371]
+admin = ["ID пользователя(ей), который будут администраторами"]
 
 SAVE_DIR = 'data'
 os.makedirs(SAVE_DIR, exist_ok=True)
