@@ -1,17 +1,14 @@
 import psycopg2
 conn = psycopg2.connect(
-    dbname='projectdb',
+    dbname='НАЗВАНИЕ БАЗЫ ДАННЫХ',
     user='postgres',
-    password='1234',
+    password='ПАРОЛЬ',
     host='localhost',
     port='5432'
 )
 
 cursor = conn.cursor()
 
-# cursor.execute("""SELECT username FROM users WHERE user_id = %s;""", (1078189371, ))
-# n = cursor.fetchall()
-# print(n)
 # SQL-команда для создания таблицы
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS users (
