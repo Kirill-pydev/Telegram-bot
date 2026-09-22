@@ -5,21 +5,24 @@ import psycopg2
 import re
 import os
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 conn = psycopg2.connect(
-    dbname="НАЗВАНИЕ БАЗЫ ДАННЫХ",
-    user="postgres",
-    password="ПАРОЛЬ",
-    host="localhost",
-    port="5432"
+    dbname=os.getenv("DB_NAME", "postgres"),
+    user=os.getenv("DB_USER", "postgres"),
+    password=os.getenv("DB_PASSWORD", "postgres"),
+    host=os.getenv("DB_HOST", "localhost"),
+    port=os.getenv("DB_PORT", "5432")
 )
 
 cur = conn.cursor()
 
 # Создаем бота с вашим токеном
-bot = telebot.TeleBot("Токен от @BotFather")
+bot = telebot.TeleBot(os.getenv("TOKEN"))
 
-admin = ["ID пользователя(ей), который будут администраторами"]
+admin = [int(os.getenv("ADMIN_ID"))]
 
 SAVE_DIR = 'data'
 os.makedirs(SAVE_DIR, exist_ok=True)
@@ -63,7 +66,6 @@ message_types = [
     "shipping_query",
     "pre_checkout_query"
 ]
-
 
 greetings_text = '''"Наши Цветы" - Ваш надежный партнер в мире флористики!\n\n
 📌 Оптовая и розничная продажа срезанных цветов сопутствующих товаров
@@ -209,7 +211,6 @@ def make_string(a):
     return '.'.join(list(map(str, a)))
 
 
-
 # НАЧАЛЬНОЕ СООБЩЕНИЕ
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -227,6 +228,7 @@ def start(message):
     if role in [2, 3]:
         keyboard.append([button4])
     keyboard = InlineKeyboardMarkup(keyboard)
+    # bot.send_message(message.chat.id, greetings_text, reply_markup=keyboard)
     with open('data/logo.jpg', 'rb') as photo:
         bot.send_photo(message.chat.id, caption=greetings_text, photo=photo, reply_markup=keyboard)
     conn.commit()
@@ -338,7 +340,7 @@ def delete_bouqet_fn(call):
 def profile_open(call):
     global profile_keyboard
     bot.delete_message(call.message.chat.id, call.message.message_id)
-    cur.execute("""SELECT email, username, user_phone_number, delivery_address FROM users WHERE user_id = %s;""",
+    cur.execute("""SELECT email, first_name, user_phone_number, delivery_address FROM users WHERE user_id = %s;""",
                 (call.message.chat.id,))
     user_info = cur.fetchone()
     profile_text = f"""Профиль\n\nИмя: {user_info[1]}\n\nНомер телефона: {user_info[2]}\n\nЭлектронная почта: {user_info[0]}\n\nАдрес доставки: {user_info[3]}"""
@@ -349,7 +351,6 @@ def profile_open(call):
 
 
 # ДОБАВЛЕНИЕ БУКЕТА В КОРЗИНУ
-
 @bot.callback_query_handler(func=lambda call: call.data in ['choose'])
 def add_to_basket(call):
     bouqet_id = bouqets[data[str(call.message.chat.id)]['click_count']][0]
@@ -471,7 +472,6 @@ def back_change(call):
     save_to_json()
 
 
-
 # СОХРАНЕНИЕ БУКЕТА
 @bot.callback_query_handler(func=lambda call: call.data == 'Сохранить')
 def save_bouqet(call):
@@ -584,7 +584,6 @@ def change_1(call):
 
 
 # ОБРАБОТКА ТЕКСТОВЫХ ПАРАМЕТРОВ У БУКЕТА
-
 @bot.message_handler(content_types=['message'])
 def text_changes(message: telebot.types.Message):
     global bouqets_keyboard, answer_b, sql_request_b, type_message_2, new_bouqet
@@ -644,7 +643,6 @@ def save_photo(*file_info):
         with open(file_path, 'wb') as new_file:
             new_file.write(downloaded_file)
             new_bouqet[sql_request_b[1]].append(file_path.split('\\')[1])
-
 
 
 # УДАЛЕНИЕ ЛЮБЫХ СООБЩЕНИЙ, КОТОРЫЕ НЕ ЖДАЛ БОТ
